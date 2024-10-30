@@ -10,6 +10,7 @@
 #### コマンドセットアップ
 ``` sh
 asdf plugin add grpcurl
+asdf plugin add kafka
 asdf install
 ```
 
