@@ -9,7 +9,11 @@
 ### Setup
 #### コマンドセットアップ
 ``` sh
-asdf plugin add buf
 asdf plugin add grpcurl
 asdf install
+```
+
+## Test
+``` sh
+grpcurl --plaintext -d '{"user_id": "user::2345178"}' localhost:9080 user.v1.UserService/GetUser
 ```

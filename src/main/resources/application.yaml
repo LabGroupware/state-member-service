@@ -1,3 +1,6 @@
 spring:
   application:
     name: user-profile-service
+grpc:
+  server:
+    port: 9080 # default: 9090
