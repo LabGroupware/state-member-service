@@ -10,6 +10,7 @@ services:
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: "user_profile"
       USE_JSON_PAYLOAD_AND_HEADERS: true
       USE_DB_ID: false
       USE_SAGA: true
@@ -56,8 +57,6 @@ services:
     depends_on:
       - "kafka"
       - "postgres"
-    networks:
-      - "debezium_network"
     ports:
       - "8083:8083"
     environment:

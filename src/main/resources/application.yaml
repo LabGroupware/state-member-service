@@ -6,6 +6,10 @@ spring:
       url: jdbc:postgresql://localhost:5432/user_profile
       username: postgres
       password: postgres
+  flyway:
+    enable: true
+    baseline-on-migrate: true # 既にあるテーブルなどがあるデータベースでもマイグレーションを実行する
+    baseline-version: 0
 grpc:
   server:
     port: 9080 # default: 9090
