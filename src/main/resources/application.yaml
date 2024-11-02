@@ -1,6 +1,24 @@
 spring:
   application:
     name: user-profile-service
+  datasource:
+      driver-class-name: org.postgresql.Driver
+      url: jdbc:postgresql://localhost:5432/user_profile
+      username: postgres
+      password: postgres
 grpc:
   server:
     port: 9080 # default: 9090
+# core:
+#     current:
+#         time:
+#             in:
+#                 milliseconds:
+#                     sql: #{null} # DefaultCoreSqlDialect使用時の現在時刻の設定.
+#     outbox:
+#         partitioning:
+#             outbox:
+#                 tables: #{null}
+#             message:
+#                 partitions: #{null}
+
