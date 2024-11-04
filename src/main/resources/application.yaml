@@ -1,11 +1,14 @@
+app:
+  name: @applicationName@
+  version: @version@
 spring:
   application:
     name: user-profile-service
   datasource:
-      driver-class-name: org.postgresql.Driver
-      url: jdbc:postgresql://localhost:5432/user_profile
-      username: postgres
-      password: postgres
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/user_profile
+    username: postgres
+    password: postgres
   flyway:
     enable: true
     baseline-on-migrate: true # 既にあるテーブルなどがあるデータベースでもマイグレーションを実行する
@@ -13,7 +16,30 @@ spring:
 grpc:
   server:
     port: 9080 # default: 9090
-# core:
+core:
+  kafka: # kafkaプロパティ
+    bootstrap:
+      servers: "localhost:9094" # kafkaサーバーアドレス
+    connection:
+      validation:
+        timeout: 1000 # 接続検証のタイムアウト時間(Default: 1000, 現在未使用)
+    consumer:
+      properties:
+        {} # Kafkaにそのまま渡されるプロパティ. 下記は既に定義されており, 他に設定したい場合や上書きしたい場合に利用.
+        # "bootstrap.servers", bootstrapServers)
+        # "group.id", subscriberId)
+        # "enable.auto.commit", "false")
+        # "key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
+        # "value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
+        # "auto.offset.reset", "earliest")
+      # back-pressure:
+      #   low: 0 # バックログ(未処理)の下限で, これを下回ったconsumerは, 一時停止されている場合に再開する.(default: 0)
+      #   high: 100 # バックログの上限で, これを上回ったconsumerは, 受け付けを一時停止して, 未処理のキューがこれを下回るまで処理のハンドルのみ続ける.(default: maxInteger)
+      poll-timeout: 100 # Kafkaコンシューマーのポーリングタイムアウトを指定, default: 100msだが, 現在未使用.
+  # outbox:
+  #   id: 1 # database id generatorを使用する場合に指定
+  database:
+    schema: core # 使用するデータベーススキーマ名
 #     current:
 #         time:
 #             in:
@@ -25,4 +51,3 @@ grpc:
 #                 tables: #{null}
 #             message:
 #                 partitions: #{null}
-

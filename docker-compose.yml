@@ -19,6 +19,7 @@ services:
     container_name: kafka
     restart: unless-stopped
     ports:
+      - "9092:9092"
       - "9094:9094" # コンテナ外部からポート9094で Kafka Broker に接続
     volumes:
       - "kafka_data:/bitnami"
@@ -52,7 +53,7 @@ services:
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
   connect:
     container_name: "connect"
-    image: "debezium/connect:2.6"
+    image: "ablankz/debezium:1.0.0"
     restart: unless-stopped
     depends_on:
       - "kafka"
@@ -65,6 +66,17 @@ services:
       CONFIG_STORAGE_TOPIC: ms_connect_configs
       OFFSET_STORAGE_TOPIC: ms_connect_offsets
       STATUS_STORAGE_TOPIC: ms_connect_statuses
+  register-connector:
+    image: curlimages/curl:latest
+    depends_on:
+      - connect
+    volumes:
+      - ./debezium/service-userprofile-connector-config.json:/tmp/service-userprofile-connector-config.json
+    entrypoint: >
+      sh -c "
+        sleep 15 &&
+        curl -X POST -H 'Content-Type: application/json' --data @/tmp/service-userprofile-connector-config.json http://connect:8083/connectors
+      "
 volumes:
   db-store:
   kafka_data:

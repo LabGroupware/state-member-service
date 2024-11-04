@@ -29,7 +29,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.flywaydb:flyway-core'
-	implementation 'build.buf.gen:labgroupware_state_grpc_java:1.67.1.1.20241030155711.48a81c940857'
+	implementation 'build.buf.gen:labgroupware_state_grpc_java:1.68.1.1.20241104185156.0a4e7766c4db'
 	implementation "net.devh:grpc-server-spring-boot-starter:${grpcStarterVersion}"
 
 	implementation 'org.cresplanex:core:1.0.0'
@@ -45,28 +45,38 @@ dependencies {
 
 import java.text.SimpleDateFormat
 
-// 引数を受け取って、マイグレーションファイルを生成するタスク
 task generateMigrationFile {
     // 引数 `migrationName`を指定できるようにする
     def migrationName = project.hasProperty('migrationName') ? project.property('migrationName') : 'create_table'
 
 	def dir = project.hasProperty('dir') ? project.property('dir') : 'ddl'
-    
+
     doLast {
         // 日付フォーマットを使用して、ファイル名に現在の日時を追加
         def timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date())
         def fileName = "V${timestamp}__${migrationName}.sql"
-        
         // ディレクトリを作成して、ファイルを生成
         def migrationDir = file("src/main/resources/db/migration/${dir}")
         migrationDir.mkdirs()
-        
+
         // ファイルを作成
         def file = new File(migrationDir, fileName)
         file.createNewFile()
-        
         println "Migration file created at: ${file.path}"
     }
+}
+
+import org.apache.tools.ant.filters.ReplaceTokens
+processResources {
+	filesMatching('**/application.yaml') {
+		filter(
+				ReplaceTokens,
+				tokens: [
+						'applicationName': "${rootProject.name}".toString(),
+						'version': "${version}".toString(),
+				]
+		)
+	}
 }
 
 tasks.named('test') {
