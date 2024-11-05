@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 @Transactional
@@ -43,6 +45,10 @@ public class UserProfileService {
                     email
             );
         });
+    }
+
+    public List<UserProfileEntity> get() {
+        return userProfileRepository.findAll();
     }
 
     public UserProfileEntity create(String userId, String name, String email) {

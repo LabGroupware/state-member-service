@@ -6,7 +6,7 @@ spring:
     name: user-profile-service
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/user_profile
+    url: jdbc:postgresql://localhost:5433/user_profile
     username: postgres
     password: postgres
   flyway:
@@ -19,7 +19,7 @@ grpc:
 core:
   kafka: # kafkaプロパティ
     bootstrap:
-      servers: "localhost:9094" # kafkaサーバーアドレス
+      servers: localhost:9094 # kafkaサーバーアドレス
     connection:
       validation:
         timeout: 1000 # 接続検証のタイムアウト時間(Default: 1000, 現在未使用)

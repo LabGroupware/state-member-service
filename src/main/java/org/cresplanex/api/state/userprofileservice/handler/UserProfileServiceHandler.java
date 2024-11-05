@@ -9,6 +9,8 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @GrpcService
 public class UserProfileServiceHandler extends UserProfileServiceGrpc.UserProfileServiceImplBase {
@@ -48,6 +50,21 @@ public class UserProfileServiceHandler extends UserProfileServiceGrpc.UserProfil
         UserProfile userProfileProto = ProtoMapper.toUserProfile(userProfile);
         FindUserProfileByEmailResponse response = FindUserProfileByEmailResponse.newBuilder()
                 .setUserProfile(userProfileProto)
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    // TODO: pagination + with count
+    @Override
+    public void getUserProfiles(GetUserProfilesRequest request, StreamObserver<GetUserProfilesResponse> responseObserver) {
+        List<UserProfileEntity> userProfiles = userProfileService.get();
+
+        List<UserProfile> userProfileProtos = userProfiles.stream()
+                .map(ProtoMapper::toUserProfile).toList();
+        GetUserProfilesResponse response = GetUserProfilesResponse.newBuilder()
+                .addAllUserProfiles(userProfileProtos)
                 .build();
 
         responseObserver.onNext(response);

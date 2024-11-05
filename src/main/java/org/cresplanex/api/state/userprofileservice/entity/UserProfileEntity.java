@@ -27,6 +27,7 @@ public class UserProfileEntity extends BaseEntity {
 
     @Id
     @OriginalAutoGenerate
+    @Column(name = "user_profile_id", length = 100, nullable = false, unique = true)
     private String userProfileId;
 
     @Column(name = "user_id", length = 100, nullable = false, unique = true)
