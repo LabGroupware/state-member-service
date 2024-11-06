@@ -2,6 +2,21 @@
 
 ## User Profile Service
 
+### Only Setup
+``` sh
+sudo chmod +x ./init.sh ./down.sh 
+```
+
+起動
+``` sh
+./init.sh
+```
+
+停止
+``` sh
+./down.sh
+```
+
 ### Environment
 - CUSTOM_SECRET: 適当な文字列
 
