@@ -12,4 +12,5 @@ public class UserCreated implements UserDomainEvent {
     private String userId;
     private String name;
     private String email;
+    private String nickname;
 }

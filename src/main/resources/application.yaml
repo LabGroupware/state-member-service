@@ -6,20 +6,20 @@ spring:
     name: user-profile-service
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5433/user_profile
-    username: postgres
-    password: postgres
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/user_profile}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
   flyway:
     enable: true
     baseline-on-migrate: true # 既にあるテーブルなどがあるデータベースでもマイグレーションを実行する
     baseline-version: 0
 grpc:
   server:
-    port: 9080 # default: 9090
+    port: {$USER_PROFILE_SERVICE_GRPC_PORT:9080} # default: 9090
 core:
   kafka: # kafkaプロパティ
     bootstrap:
-      servers: localhost:9094 # kafkaサーバーアドレス
+      servers: ${KAFKA_SERVER:localhost:9094} # kafkaサーバーアドレス
     connection:
       validation:
         timeout: 1000 # 接続検証のタイムアウト時間(Default: 1000, 現在未使用)
@@ -39,7 +39,7 @@ core:
   # outbox:
   #   id: 1 # database id generatorを使用する場合に指定
   database:
-    schema: core # 使用するデータベーススキーマ名
+    schema: ${DB_CORE_SCHEMA:core} # 使用するデータベーススキーマ名
 #     current:
 #         time:
 #             in:
