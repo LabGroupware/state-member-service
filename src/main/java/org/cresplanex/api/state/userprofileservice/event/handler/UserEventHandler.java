@@ -1,7 +1,7 @@
 package org.cresplanex.api.state.userprofileservice.event.handler;
 
-import org.cresplanex.api.state.userprofileservice.constants.EventAggregateTypes;
-import org.cresplanex.api.state.userprofileservice.constants.EventTypes;
+import org.cresplanex.api.state.userprofileservice.event.EventAggregateChannel;
+import org.cresplanex.api.state.userprofileservice.event.EventType;
 import org.cresplanex.api.state.userprofileservice.event.model.user.UserCreated;
 import org.cresplanex.api.state.userprofileservice.event.model.user.UserInfoUpdated;
 import org.cresplanex.core.events.common.DomainEventEnvelope;
@@ -21,9 +21,9 @@ public class UserEventHandler {
 
     public DomainEventHandlers domainEventHandlers() {
         return DomainEventHandlersBuilder
-                .forAggregateType(EventAggregateTypes.USER)
-                .onEvent(UserCreated.class, this::handleUserCreated, EventTypes.USER_CREATED)
-                .onEvent(UserInfoUpdated.class, this::handleUserInfoUpdated, EventTypes.USER_INFO_UPDATED)
+                .forAggregateType(EventAggregateChannel.USER)
+                .onEvent(UserCreated.class, this::handleUserCreated, EventType.USER_CREATED)
+                .onEvent(UserInfoUpdated.class, this::handleUserInfoUpdated, EventType.USER_INFO_UPDATED)
                 .build();
     }
 

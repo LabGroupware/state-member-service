@@ -4,6 +4,10 @@ import org.cresplanex.api.state.userprofileservice.entity.UserProfileEntity;
 import org.cresplanex.api.state.userprofileservice.event.publisher.UserProfileDomainEventPublisher;
 import org.cresplanex.api.state.userprofileservice.exception.UserProfileNotFoundException;
 import org.cresplanex.api.state.userprofileservice.repository.UserProfileRepository;
+import org.cresplanex.api.state.userprofileservice.saga.model.userprofile.CreateUserProfileSaga;
+import org.cresplanex.api.state.userprofileservice.saga.state.userprofile.CreateUserProfileSagaState;
+import org.cresplanex.api.state.userprofileservice.saga.state.userprofile.UserProfileSimplifiedDetail;
+import org.cresplanex.core.saga.orchestration.SagaInstanceFactory;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -17,8 +21,10 @@ import java.util.List;
 public class UserProfileService {
 
     private final UserProfileRepository userProfileRepository;
-
     private final UserProfileDomainEventPublisher domainEventPublisher;
+    private final SagaInstanceFactory sagaInstanceFactory;
+
+    private final CreateUserProfileSaga createUserProfileSaga;
 
     public UserProfileEntity findById(String userProfileId) {
         return userProfileRepository.findById(userProfileId).orElseThrow(() -> {
@@ -51,15 +57,30 @@ public class UserProfileService {
         return userProfileRepository.findAll();
     }
 
-    public UserProfileEntity create(String userId, String name, String email) {
-        //        domainEventPublisher.publish(EventAggregateTypes.USER, userId,
-//                Collections.singletonList(new UserCreated(userId, "tesst", "email@example.com")),
-//                EventTypes.USER_CREATED);
+    public void beginCreate(UserProfileEntity profile) {
+        UserProfileSimplifiedDetail detail = new UserProfileSimplifiedDetail();
+        detail.setUserId(profile.getUserId());
+        detail.setName(profile.getName());
+        detail.setEmail(profile.getEmail());
+        detail.setNickname(profile.getNickname());
+        CreateUserProfileSagaState state = new CreateUserProfileSagaState();
+        state.setUserProfileDetail(detail);
 
-        UserProfileEntity profile = new UserProfileEntity();
-        profile.setUserId(userId);
-        profile.setName(name);
-        profile.setEmail(email);
+        sagaInstanceFactory.create(createUserProfileSaga, state);
+    }
+
+    public UserProfileEntity create(UserProfileEntity profile) {
         return userProfileRepository.save(profile);
+    }
+
+    public void undoCreate(String userProfileId) {
+        UserProfileEntity profile = findById(userProfileId);
+        if (profile == null) {
+            throw new UserProfileNotFoundException(
+                    UserProfileNotFoundException.FindType.BY_ID,
+                    userProfileId
+            );
+        }
+        userProfileRepository.delete(profile);
     }
 }
