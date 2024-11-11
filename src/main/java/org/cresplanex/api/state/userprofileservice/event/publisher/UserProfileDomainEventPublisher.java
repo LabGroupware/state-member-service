@@ -11,6 +11,6 @@ import org.springframework.stereotype.Component;
 public class UserProfileDomainEventPublisher extends AbstractAggregateDomainEventPublisher<UserProfileEntity, UserProfileDomainEvent> {
 
     public UserProfileDomainEventPublisher(DomainEventPublisher eventPublisher) {
-        super(eventPublisher, UserProfileEntity.class, UserProfileEntity::getUserId, EventAggregateChannel.USER_PROFILE);
+        super(eventPublisher, UserProfileEntity.class, UserProfileEntity::getUserProfileId, EventAggregateChannel.USER_PROFILE);
     }
 }

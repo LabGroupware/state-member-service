@@ -6,7 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class UndoCreateUserProfileCommand extends UserProfileSagaCommand {
-    public static final String TYPE = "org.cresplanex.service.userprofile.saga.command.userprofile.UndoCreateUserProfileCommand";
+    public static final String TYPE = "org.cresplanex.nova.service.userprofile.saga.command.userprofile.UndoCreateUserProfileCommand";
 
     private final String userProfileId;
 }

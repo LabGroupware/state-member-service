@@ -21,7 +21,6 @@ import java.util.List;
 public class UserProfileService {
 
     private final UserProfileRepository userProfileRepository;
-    private final UserProfileDomainEventPublisher domainEventPublisher;
     private final SagaInstanceFactory sagaInstanceFactory;
 
     private final CreateUserProfileSaga createUserProfileSaga;

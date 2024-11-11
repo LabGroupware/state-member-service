@@ -6,7 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class CreateUserProfileCommand extends UserProfileSagaCommand {
-    public static final String TYPE = "org.cresplanex.service.userprofile.saga.command.userprofile.CreateUserProfileCommand";
+    public static final String TYPE = "org.cresplanex.nova.service.userprofile.saga.command.userprofile.CreateUserProfileCommand";
 
     private final String userId;
     private final String name;

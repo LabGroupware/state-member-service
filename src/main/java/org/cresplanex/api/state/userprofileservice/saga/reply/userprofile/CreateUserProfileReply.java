@@ -2,11 +2,23 @@ package org.cresplanex.api.state.userprofileservice.saga.reply.userprofile;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.cresplanex.api.state.userprofileservice.saga.reply.BaseSuccessfullyReply;
 
-@AllArgsConstructor
-@Getter
-public class CreateUserProfileReply {
-    public static final String TYPE = "org.cresplanex.service.userprofile.saga.reply.userprofile.CreateUserProfileReply";
+public class CreateUserProfileReply extends BaseSuccessfullyReply<CreateUserProfileReply.Data> {
+    public static final String TYPE = "org.cresplanex.nova.service.userprofile.saga.reply.userprofile.CreateUserProfileReply";
 
-    private String userProfileId;
+    public CreateUserProfileReply(Data data, String code, String caption, String timestamp) {
+        super(data, code, caption, timestamp);
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public static class Data {
+        private final String userProfileId;
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
+    }
 }

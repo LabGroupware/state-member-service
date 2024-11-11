@@ -8,9 +8,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserCreated implements UserDomainEvent {
+    public static final String TYPE = "org.cresplanex.account.event.User.Created";
 
     private String userId;
     private String name;
     private String email;
     private String nickname;
+
+    public String getType() {
+        return TYPE;
+    }
 }
