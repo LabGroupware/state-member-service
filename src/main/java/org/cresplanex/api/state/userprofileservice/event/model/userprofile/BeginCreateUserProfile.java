@@ -7,8 +7,11 @@ import java.util.List;
 public class BeginCreateUserProfile extends BeginJob implements UserProfileDomainEvent{
     public static final String TYPE = "org.cresplanex.nova.service.userprofile.event.UserProfile.CreateBegin";
 
-    public BeginCreateUserProfile(String jobId, List<String> toActionCodes) {
-        super(jobId, toActionCodes);
+    public BeginCreateUserProfile(String jobId, List<String> toActionCodes, String pendingActionCode, String timestamp) {
+        super(jobId, toActionCodes, pendingActionCode, timestamp);
+    }
+
+    public BeginCreateUserProfile() {
     }
 
     @Override

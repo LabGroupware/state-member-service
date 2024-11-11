@@ -2,6 +2,7 @@ package org.cresplanex.api.state.userprofileservice.saga.reply.userprofile;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.cresplanex.api.state.userprofileservice.saga.reply.BaseSuccessfullyReply;
 
 public class CreateUserProfileReply extends BaseSuccessfullyReply<CreateUserProfileReply.Data> {
@@ -11,10 +12,14 @@ public class CreateUserProfileReply extends BaseSuccessfullyReply<CreateUserProf
         super(data, code, caption, timestamp);
     }
 
+    public CreateUserProfileReply() {
+    }
+
     @AllArgsConstructor
+    @NoArgsConstructor
     @Getter
     public static class Data {
-        private final String userProfileId;
+        private String userProfileId;
     }
 
     @Override

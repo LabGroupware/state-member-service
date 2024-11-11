@@ -16,6 +16,7 @@ public class CreateUserProfileSagaState {
     private String userProfileId;
     private UserProfileSimplifiedDetail userProfileDetail;
     private CreateUserProfileSaga.Action nextAction;
+    private String startedAt;
 
     public CreateUserProfileCommand makeCreateUserProfileCommand() {
         return new CreateUserProfileCommand(

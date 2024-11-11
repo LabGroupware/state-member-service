@@ -18,6 +18,9 @@ public class ProcessedCreateUserProfile extends ProcessedJob implements UserProf
         super(jobId, data, actionCode, internalCode, internalCaption, timestamp);
     }
 
+    public ProcessedCreateUserProfile() {
+    }
+
     @Override
     public String getType() {
         return TYPE;

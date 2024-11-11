@@ -18,6 +18,8 @@ import org.cresplanex.core.saga.orchestration.SagaDefinition;
 import org.cresplanex.core.saga.simpledsl.SimpleSaga;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Component
@@ -104,7 +106,7 @@ public class CreateUserProfileSaga implements SimpleSaga<CreateUserProfileSagaSt
 
     public enum Action {
         CREATE_USER_PROFILE,
-        CREATE_USER_PRESENCE
+//        CREATE_USER_PRESENCE
     }
 
     private Action getStartAction() {
@@ -127,15 +129,23 @@ public class CreateUserProfileSaga implements SimpleSaga<CreateUserProfileSagaSt
     @Override
     public void onStarting(String sagaId, CreateUserProfileSagaState data) {
         data.setNextAction(getStartAction());
+        data.setStartedAt(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         UserProfileEntity entity = new UserProfileEntity();
         entity.setUserProfileId(data.getUserProfileId() == null ? EventDummyId.NOT_INITIALIZED : data.getUserProfileId());
+        List<String> actionNames = this.getActionNames();
+
+        String firstAction = actionNames.getFirst();
+        List<String> nextActions = actionNames.subList(1, actionNames.size());
+
         this.domainEventPublisher.publish(
                 entity,
                 Collections.singletonList(
                         new BeginCreateUserProfile(
                                 data.getJobId(),
-                                this.getActionNames()
+                                nextActions,
+                                firstAction,
+                                data.getStartedAt()
                         )
                 ),
                 BeginCreateUserProfile.TYPE);

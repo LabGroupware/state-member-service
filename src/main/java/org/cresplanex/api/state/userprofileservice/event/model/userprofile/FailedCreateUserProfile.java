@@ -17,6 +17,9 @@ public class FailedCreateUserProfile extends FailedJob implements UserProfileDom
         super(jobId, data, actionCode, internalCode, internalCaption, timestamp, endedErrorAttributes);
     }
 
+    public FailedCreateUserProfile() {
+    }
+
     @Override
     public String getType() {
         return TYPE;

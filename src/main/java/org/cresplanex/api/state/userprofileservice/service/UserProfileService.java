@@ -1,7 +1,10 @@
 package org.cresplanex.api.state.userprofileservice.service;
 
+import build.buf.gen.job.v1.CreateJobRequest;
+import build.buf.gen.job.v1.JobServiceGrpc;
+import lombok.extern.slf4j.Slf4j;
+import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.cresplanex.api.state.userprofileservice.entity.UserProfileEntity;
-import org.cresplanex.api.state.userprofileservice.event.publisher.UserProfileDomainEventPublisher;
 import org.cresplanex.api.state.userprofileservice.exception.UserProfileNotFoundException;
 import org.cresplanex.api.state.userprofileservice.repository.UserProfileRepository;
 import org.cresplanex.api.state.userprofileservice.saga.model.userprofile.CreateUserProfileSaga;
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 @Transactional
@@ -22,6 +26,9 @@ public class UserProfileService {
 
     private final UserProfileRepository userProfileRepository;
     private final SagaInstanceFactory sagaInstanceFactory;
+
+    @GrpcClient("jobService")
+    private JobServiceGrpc.JobServiceBlockingStub jobServiceBlockingStub;
 
     private final CreateUserProfileSaga createUserProfileSaga;
 
@@ -64,6 +71,11 @@ public class UserProfileService {
         detail.setNickname(profile.getNickname());
         CreateUserProfileSagaState state = new CreateUserProfileSagaState();
         state.setUserProfileDetail(detail);
+
+        String jobId = jobServiceBlockingStub.createJob(
+                CreateJobRequest.newBuilder().build()
+        ).getJobId();
+        state.setJobId(jobId);
 
         sagaInstanceFactory.create(createUserProfileSaga, state);
     }

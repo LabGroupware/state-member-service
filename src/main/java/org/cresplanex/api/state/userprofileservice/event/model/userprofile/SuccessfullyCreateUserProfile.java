@@ -12,6 +12,9 @@ public class SuccessfullyCreateUserProfile extends SuccessfullyJob implements Us
         super(jobId, data);
     }
 
+    public SuccessfullyCreateUserProfile() {
+    }
+
     @Override
     public String getType() {
         return TYPE;

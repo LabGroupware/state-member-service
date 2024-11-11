@@ -11,6 +11,9 @@ public class FailureCreateUserProfileReply extends BaseFailureReply {
         super(data, code, caption, timestamp);
     }
 
+    public FailureCreateUserProfileReply() {
+    }
+
     @Override
     public String getType() {
         return TYPE;

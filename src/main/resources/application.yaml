@@ -15,7 +15,13 @@ spring:
     baseline-version: 0
 grpc:
   server:
-    port: {$USER_PROFILE_SERVICE_GRPC_PORT:9080} # default: 9090
+    port: ${USER_PROFILE_SERVICE_GRPC_PORT:9080} # default: 9090
+  client:
+    jobService:
+      address: dns:///${JOB_SERVICE_HOST:localhost}:${JOB_SERVICE_GRPC_PORT:9100}
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: PLAINTEXT
 core:
   kafka: # kafkaプロパティ
     bootstrap:

@@ -2,16 +2,20 @@ package org.cresplanex.api.state.userprofileservice.event.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.cresplanex.api.state.userprofileservice.event.model.userprofile.UserProfileDomainEvent;
 
 import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public abstract class BeginJob {
 
-    private final String jobId;
-    private final List<String> toActionCodes;
+    private String jobId;
+    private List<String> toActionCodes;
+    private String pendingActionCode;
+    private String timestamp;
 
     abstract public String getType();
 }

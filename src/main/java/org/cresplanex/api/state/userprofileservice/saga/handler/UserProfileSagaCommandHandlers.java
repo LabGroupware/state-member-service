@@ -56,7 +56,7 @@ public class UserProfileSagaCommandHandlers {
                     new CreateUserProfileReply.Data(userProfile.getUserProfileId()),
                     ResponseCode.SUCCESS,
                     "User profile created successfully",
-                    LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME)
+                    LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             );
             return withLock(LockTargetType.USER_PROFILE, userProfile.getUserProfileId())
                     .withSuccess(reply, CreateUserProfileReply.TYPE);
@@ -65,7 +65,7 @@ public class UserProfileSagaCommandHandlers {
                     null,
                     ResponseCode.INTERNAL_ERROR,
                     "Failed to create user profile",
-                    LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME)
+                    LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             );
             return withFailure(reply, FailureCreateUserProfileReply.TYPE);
         }
