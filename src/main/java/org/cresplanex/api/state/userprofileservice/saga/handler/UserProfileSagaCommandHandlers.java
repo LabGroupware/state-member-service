@@ -2,6 +2,7 @@ package org.cresplanex.api.state.userprofileservice.saga.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.cresplanex.api.state.userprofileservice.constants.ResponseCode;
+import org.cresplanex.api.state.userprofileservice.constants.ServerErrorCode;
 import org.cresplanex.api.state.userprofileservice.entity.UserProfileEntity;
 import org.cresplanex.api.state.userprofileservice.saga.LockTargetType;
 import org.cresplanex.api.state.userprofileservice.saga.SagaCommandChannel;
@@ -54,7 +55,7 @@ public class UserProfileSagaCommandHandlers {
             userProfile = userProfileService.create(userProfile);
             CreateUserProfileReply reply = new CreateUserProfileReply(
                     new CreateUserProfileReply.Data(userProfile.getUserProfileId()),
-                    ResponseCode.SUCCESS,
+                    ServerErrorCode.USER_PROFILE_SUCCESS,
                     "User profile created successfully",
                     LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             );
@@ -63,7 +64,7 @@ public class UserProfileSagaCommandHandlers {
         } catch (Exception e) {
             FailureCreateUserProfileReply reply = new FailureCreateUserProfileReply(
                     null,
-                    ResponseCode.INTERNAL_ERROR,
+                    ServerErrorCode.USER_PROFILE_INTERNAL_ERROR,
                     "Failed to create user profile",
                     LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             );
