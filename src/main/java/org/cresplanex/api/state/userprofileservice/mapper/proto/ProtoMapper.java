@@ -1,15 +1,15 @@
 package org.cresplanex.api.state.userprofileservice.mapper.proto;
 
 import build.buf.gen.userprofile.v1.UserProfile;
+import org.cresplanex.api.state.common.utils.ValueFromNullable;
 import org.cresplanex.api.state.userprofileservice.entity.UserProfileEntity;
-
-import org.cresplanex.api.state.userprofileservice.utils.ValueFromNullable;
 
 public class ProtoMapper {
 
-    public static UserProfile toUserProfile(UserProfileEntity userProfileEntity) {
+    public static UserProfile convert(UserProfileEntity userProfileEntity) {
 
         return UserProfile.newBuilder()
+                .setUserProfileId(userProfileEntity.getUserProfileId())
                 .setUserId(userProfileEntity.getUserId())
                 .setName(userProfileEntity.getName())
                 .setEmail(userProfileEntity.getEmail())

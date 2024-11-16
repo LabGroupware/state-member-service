@@ -21,7 +21,7 @@ public class UserProfileServiceHandler extends UserProfileServiceGrpc.UserProfil
     public void findUserProfile(FindUserProfileRequest request, StreamObserver<FindUserProfileResponse> responseObserver) {
         UserProfileEntity userProfile = userProfileService.findById(request.getUserProfileId());
 
-        UserProfile userProfileProto = ProtoMapper.toUserProfile(userProfile);
+        UserProfile userProfileProto = ProtoMapper.convert(userProfile);
         FindUserProfileResponse response = FindUserProfileResponse.newBuilder()
                 .setUserProfile(userProfileProto)
                 .build();
@@ -34,7 +34,7 @@ public class UserProfileServiceHandler extends UserProfileServiceGrpc.UserProfil
     public void findUserProfileByUserId(FindUserProfileByUserIdRequest request, StreamObserver<FindUserProfileByUserIdResponse> responseObserver) {
         UserProfileEntity userProfile = userProfileService.findByUserId(request.getUserId());
 
-        UserProfile userProfileProto = ProtoMapper.toUserProfile(userProfile);
+        UserProfile userProfileProto = ProtoMapper.convert(userProfile);
         FindUserProfileByUserIdResponse response = FindUserProfileByUserIdResponse.newBuilder()
                 .setUserProfile(userProfileProto)
                 .build();
@@ -47,7 +47,7 @@ public class UserProfileServiceHandler extends UserProfileServiceGrpc.UserProfil
     public void findUserProfileByEmail(FindUserProfileByEmailRequest request, StreamObserver<FindUserProfileByEmailResponse> responseObserver) {
         UserProfileEntity userProfile = userProfileService.findByEmail(request.getEmail());
 
-        UserProfile userProfileProto = ProtoMapper.toUserProfile(userProfile);
+        UserProfile userProfileProto = ProtoMapper.convert(userProfile);
         FindUserProfileByEmailResponse response = FindUserProfileByEmailResponse.newBuilder()
                 .setUserProfile(userProfileProto)
                 .build();
@@ -62,7 +62,7 @@ public class UserProfileServiceHandler extends UserProfileServiceGrpc.UserProfil
         List<UserProfileEntity> userProfiles = userProfileService.get();
 
         List<UserProfile> userProfileProtos = userProfiles.stream()
-                .map(ProtoMapper::toUserProfile).toList();
+                .map(ProtoMapper::convert).toList();
         GetUserProfilesResponse response = GetUserProfilesResponse.newBuilder()
                 .addAllUserProfiles(userProfileProtos)
                 .build();

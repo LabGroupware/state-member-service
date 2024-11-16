@@ -1,15 +1,12 @@
 package org.cresplanex.api.state.userprofileservice.service;
 
-import build.buf.gen.job.v1.CreateJobRequest;
-import build.buf.gen.job.v1.JobServiceGrpc;
 import lombok.extern.slf4j.Slf4j;
-import net.devh.boot.grpc.client.inject.GrpcClient;
+import org.cresplanex.api.state.common.service.BaseService;
 import org.cresplanex.api.state.userprofileservice.entity.UserProfileEntity;
 import org.cresplanex.api.state.userprofileservice.exception.UserProfileNotFoundException;
 import org.cresplanex.api.state.userprofileservice.repository.UserProfileRepository;
 import org.cresplanex.api.state.userprofileservice.saga.model.userprofile.CreateUserProfileSaga;
 import org.cresplanex.api.state.userprofileservice.saga.state.userprofile.CreateUserProfileSagaState;
-import org.cresplanex.api.state.userprofileservice.saga.state.userprofile.UserProfileSimplifiedDetail;
 import org.cresplanex.core.saga.orchestration.SagaInstanceFactory;
 import org.springframework.stereotype.Service;
 
@@ -22,13 +19,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 @Transactional
-public class UserProfileService {
+public class UserProfileService extends BaseService {
 
     private final UserProfileRepository userProfileRepository;
     private final SagaInstanceFactory sagaInstanceFactory;
-
-    @GrpcClient("jobService")
-    private JobServiceGrpc.JobServiceBlockingStub jobServiceBlockingStub;
 
     private final CreateUserProfileSaga createUserProfileSaga;
 
@@ -64,17 +58,16 @@ public class UserProfileService {
     }
 
     public void beginCreate(UserProfileEntity profile) {
-        UserProfileSimplifiedDetail detail = new UserProfileSimplifiedDetail();
-        detail.setUserId(profile.getUserId());
-        detail.setName(profile.getName());
-        detail.setEmail(profile.getEmail());
-        detail.setNickname(profile.getNickname());
+        CreateUserProfileSagaState.InitialData initialData = CreateUserProfileSagaState.InitialData.builder()
+                .userId(profile.getUserId())
+                .name(profile.getName())
+                .email(profile.getEmail())
+                .nickname(profile.getNickname())
+                .build();
         CreateUserProfileSagaState state = new CreateUserProfileSagaState();
-        state.setUserProfileDetail(detail);
+        state.setInitialData(initialData);
 
-        String jobId = jobServiceBlockingStub.createJob(
-                CreateJobRequest.newBuilder().build()
-        ).getJobId();
+        String jobId = getJobId();
         state.setJobId(jobId);
 
         sagaInstanceFactory.create(createUserProfileSaga, state);

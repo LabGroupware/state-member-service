@@ -1,33 +1,63 @@
 package org.cresplanex.api.state.userprofileservice.saga.state.userprofile;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.cresplanex.api.state.userprofileservice.saga.command.userprofile.CreateUserProfileCommand;
-import org.cresplanex.api.state.userprofileservice.saga.command.userprofile.UndoCreateUserProfileCommand;
+import lombok.*;
+import org.cresplanex.api.state.common.dto.userpreference.UserPreferenceDto;
+import org.cresplanex.api.state.common.dto.userprofile.UserProfileDto;
+import org.cresplanex.api.state.common.saga.command.userpreference.CreateUserPreferenceCommand;
+import org.cresplanex.api.state.common.saga.command.userprofile.CreateUserProfileCommand;
+import org.cresplanex.api.state.common.saga.state.SagaState;
+import org.cresplanex.api.state.userprofileservice.entity.UserProfileEntity;
 import org.cresplanex.api.state.userprofileservice.saga.model.userprofile.CreateUserProfileSaga;
 
-@AllArgsConstructor
+@Setter
+@Getter
 @NoArgsConstructor
-@Data
-public class CreateUserProfileSagaState {
+public class CreateUserProfileSagaState
+        extends SagaState<CreateUserProfileSaga.Action, UserProfileEntity> {
+    private InitialData initialData;
+    private UserProfileDto userProfileDto = new UserProfileDto();
+    private UserPreferenceDto userPreferenceDto = new UserPreferenceDto();
 
-    private String jobId;
-    private String userProfileId;
-    private UserProfileSimplifiedDetail userProfileDetail;
-    private CreateUserProfileSaga.Action nextAction;
-    private String startedAt;
+    @Override
+    public String getId() {
+        return userProfileDto.getUserProfileId();
+    }
 
-    public CreateUserProfileCommand makeCreateUserProfileCommand() {
-        return new CreateUserProfileCommand(
-                userProfileDetail.getUserId(),
-                userProfileDetail.getName(),
-                userProfileDetail.getEmail(),
-                userProfileDetail.getNickname()
+    @Override
+    public Class<UserProfileEntity> getEntityClass() {
+        return UserProfileEntity.class;
+    }
+
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class InitialData {
+        private String userId;
+        private String name;
+        private String email;
+        private String nickname;
+    }
+
+    public CreateUserProfileCommand.Exec makeCreateUserProfileCommand() {
+        return new CreateUserProfileCommand.Exec(
+                initialData.getUserId(),
+                initialData.getName(),
+                initialData.getEmail(),
+                initialData.getNickname()
         );
     }
 
-    public UndoCreateUserProfileCommand makeUndoCreateUserProfileCommand() {
-        return new UndoCreateUserProfileCommand(userProfileId);
+    public CreateUserProfileCommand.Undo makeUndoCreateUserProfileCommand() {
+        return new CreateUserProfileCommand.Undo(userProfileDto.getUserProfileId());
+    }
+
+    public CreateUserPreferenceCommand.Exec makeCreateUserPreferenceCommand() {
+        return new CreateUserPreferenceCommand.Exec(initialData.getUserId());
+    }
+
+    public CreateUserPreferenceCommand.Undo makeUndoCreateUserPreferenceCommand() {
+        return new CreateUserPreferenceCommand.Undo(userPreferenceDto.getUserPreferenceId());
     }
 }

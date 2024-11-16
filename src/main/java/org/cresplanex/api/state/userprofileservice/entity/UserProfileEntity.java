@@ -2,7 +2,7 @@ package org.cresplanex.api.state.userprofileservice.entity;
 
 import java.time.LocalDate;
 
-import org.cresplanex.api.state.userprofileservice.utils.OriginalAutoGenerate;
+import org.cresplanex.api.state.common.entity.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.cresplanex.api.state.common.utils.OriginalAutoGenerate;
 
 @Entity
 @Getter
@@ -24,6 +25,16 @@ import lombok.ToString;
 @NoArgsConstructor
 @Table(name = "user_profiles")
 public class UserProfileEntity extends BaseEntity {
+
+    @Override
+    public String getId() {
+        return userProfileId;
+    }
+
+    @Override
+    public void setId(String id) {
+        userProfileId = id;
+    }
 
     @Id
     @OriginalAutoGenerate

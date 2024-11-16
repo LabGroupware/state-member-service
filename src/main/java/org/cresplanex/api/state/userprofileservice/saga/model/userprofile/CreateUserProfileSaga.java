@@ -1,36 +1,36 @@
 package org.cresplanex.api.state.userprofileservice.saga.model.userprofile;
 
+import org.cresplanex.api.state.common.event.model.userprofile.UserProfileCreated;
+import org.cresplanex.api.state.common.event.model.userprofile.UserProfileDomainEvent;
+import org.cresplanex.api.state.common.event.publisher.AggregateDomainEventPublisher;
+import org.cresplanex.api.state.common.saga.SagaCommandChannel;
+import org.cresplanex.api.state.common.saga.data.userprofile.CreateUserProfileResultData;
+import org.cresplanex.api.state.common.saga.model.SagaModel;
+import org.cresplanex.api.state.common.saga.reply.userpreference.CreateUserPreferenceReply;
+import org.cresplanex.api.state.common.saga.reply.userprofile.CreateUserProfileReply;
+import org.cresplanex.api.state.common.saga.type.UserProfileSagaType;
 import org.cresplanex.api.state.userprofileservice.entity.UserProfileEntity;
-import org.cresplanex.api.state.userprofileservice.event.EventDummyId;
-import org.cresplanex.api.state.userprofileservice.event.model.userprofile.BeginCreateUserProfile;
-import org.cresplanex.api.state.userprofileservice.event.model.userprofile.FailedCreateUserProfile;
-import org.cresplanex.api.state.userprofileservice.event.model.userprofile.ProcessedCreateUserProfile;
-import org.cresplanex.api.state.userprofileservice.event.model.userprofile.SuccessfullyCreateUserProfile;
 import org.cresplanex.api.state.userprofileservice.event.publisher.UserProfileDomainEventPublisher;
-import org.cresplanex.api.state.userprofileservice.saga.SagaCommandChannel;
-import org.cresplanex.api.state.userprofileservice.saga.data.userprofile.CreateUserProfileData;
+import org.cresplanex.api.state.userprofileservice.saga.proxy.UserPreferenceServiceProxy;
 import org.cresplanex.api.state.userprofileservice.saga.proxy.UserProfileServiceProxy;
-import org.cresplanex.api.state.userprofileservice.saga.reply.BaseSuccessfullyReply;
-import org.cresplanex.api.state.userprofileservice.saga.reply.userprofile.CreateUserProfileReply;
-import org.cresplanex.api.state.userprofileservice.saga.reply.userprofile.FailureCreateUserProfileReply;
 import org.cresplanex.api.state.userprofileservice.saga.state.userprofile.CreateUserProfileSagaState;
 import org.cresplanex.core.saga.orchestration.SagaDefinition;
-import org.cresplanex.core.saga.simpledsl.SimpleSaga;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-
 @Component
-public class CreateUserProfileSaga implements SimpleSaga<CreateUserProfileSagaState> {
-    public static final String TYPE = "org.cresplanex.nova.service.userprofile.saga.CreateUserProfileSaga";
+public class CreateUserProfileSaga extends SagaModel<
+        UserProfileEntity,
+        UserProfileDomainEvent,
+        CreateUserProfileSaga.Action,
+        CreateUserProfileSagaState> {
 
     private final SagaDefinition<CreateUserProfileSagaState> sagaDefinition;
     private final UserProfileDomainEventPublisher domainEventPublisher;
 
     public CreateUserProfileSaga(
-            UserProfileServiceProxy userProfileService, UserProfileDomainEventPublisher domainEventPublisher
+            UserProfileServiceProxy userProfileService,
+            UserPreferenceServiceProxy userPreferenceServiceProxy,
+            UserProfileDomainEventPublisher domainEventPublisher
     ) {
         this.sagaDefinition = step()
                 .invokeParticipant(
@@ -38,143 +38,99 @@ public class CreateUserProfileSaga implements SimpleSaga<CreateUserProfileSagaSt
                         CreateUserProfileSagaState::makeCreateUserProfileCommand
                 )
                 .onReply(
-                        CreateUserProfileReply.class,
-                        CreateUserProfileReply.TYPE,
+                        CreateUserProfileReply.Success.class,
+                        CreateUserProfileReply.Success.TYPE,
                         this::handleCreateUserProfileReply
                 )
                 .onReply(
-                        FailureCreateUserProfileReply.class,
-                        FailureCreateUserProfileReply.TYPE,
+                        CreateUserProfileReply.Failure.class,
+                        CreateUserProfileReply.Failure.TYPE,
                         this::handleFailureReply
                 )
                 .withCompensation(
                         userProfileService.undoCreateUserProfile,
                         CreateUserProfileSagaState::makeUndoCreateUserProfileCommand
                 )
+                .step()
+                .invokeParticipant(
+                        userPreferenceServiceProxy.createUserPreference,
+                        CreateUserProfileSagaState::makeCreateUserPreferenceCommand
+                )
+                .onReply(
+                        CreateUserPreferenceReply.Success.class,
+                        CreateUserPreferenceReply.Success.TYPE,
+                        this::handleCreateUserPreferenceReply
+                )
+                .onReply(
+                        CreateUserPreferenceReply.Failure.class,
+                        CreateUserPreferenceReply.Failure.TYPE,
+                        this::handleFailureReply
+                )
+                .withCompensation(
+                        userPreferenceServiceProxy.undoCreateUserPreference,
+                        CreateUserProfileSagaState::makeUndoCreateUserPreferenceCommand
+                )
                 .build();
         this.domainEventPublisher = domainEventPublisher;
     }
 
-    private void handleFailureReply(CreateUserProfileSagaState state, FailureCreateUserProfileReply reply) {
-        UserProfileEntity entity = new UserProfileEntity();
-        entity.setUserProfileId(state.getUserProfileId() == null ? EventDummyId.NOT_INITIALIZED : state.getUserProfileId());
-        Map<String, Object> endedErrorAttributes = new HashMap<>();
-        endedErrorAttributes.put("actionCode", state.getNextAction().name());
-        endedErrorAttributes.put("detail", reply.getData());
-
-        this.domainEventPublisher.publish(
-                entity,
-                Collections.singletonList(
-                        new FailedCreateUserProfile(
-                                state.getJobId(),
-                                reply.getData(),
-                                state.getNextAction().name(),
-                                reply.getCode(),
-                                reply.getCaption(),
-                                reply.getTimestamp(),
-                                endedErrorAttributes
-                        )
-                ),
-                FailedCreateUserProfile.TYPE);
-    }
-
-    private void handleCreateUserProfileReply(CreateUserProfileSagaState state, CreateUserProfileReply reply) {
-        CreateUserProfileReply.Data data = reply.getData();
-        state.setUserProfileId(data.getUserProfileId());
-        processedEventPublish(state, reply);
-    }
-
-    private <Data> void processedEventPublish(CreateUserProfileSagaState state, BaseSuccessfullyReply<Data> reply) {
-        Data data = reply.getData();
-        UserProfileEntity entity = new UserProfileEntity();
-        entity.setUserProfileId(state.getUserProfileId() == null ? EventDummyId.NOT_INITIALIZED : state.getUserProfileId());
-        this.domainEventPublisher.publish(
-                entity,
-                Collections.singletonList(
-                        new ProcessedCreateUserProfile(
-                                state.getJobId(),
-                                data,
-                                state.getNextAction().name(),
-                                reply.getCode(),
-                                reply.getCaption(),
-                                reply.getTimestamp()
-                        )
-                ),
-                ProcessedCreateUserProfile.TYPE);
-        state.setNextAction(getNext(state.getNextAction()));
-    }
-
-    public enum Action {
-        CREATE_USER_PROFILE,
-//        CREATE_USER_PRESENCE
-    }
-
-    private Action getStartAction() {
-        return Action.CREATE_USER_PROFILE;
-    }
-
-    private Action getNext(Action current) {
-        List<Action> actions = Arrays.asList(Action.values());
-        int index = actions.indexOf(current);
-        if (index == actions.size() - 1) {
-            return null;
-        }
-        return actions.get(index + 1);
-    }
-
-    private List<String> getActionNames() {
-        return Arrays.stream(Action.values()).map(Enum::name).toList();
+    @Override
+    protected AggregateDomainEventPublisher<UserProfileEntity, UserProfileDomainEvent>
+    getDomainEventPublisher() {
+        return domainEventPublisher;
     }
 
     @Override
-    public void onStarting(String sagaId, CreateUserProfileSagaState data) {
-        data.setNextAction(getStartAction());
-        data.setStartedAt(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+    protected Action[] getActions() {
+        return Action.values();
+    }
 
-        UserProfileEntity entity = new UserProfileEntity();
-        entity.setUserProfileId(data.getUserProfileId() == null ? EventDummyId.NOT_INITIALIZED : data.getUserProfileId());
-        List<String> actionNames = this.getActionNames();
+    @Override
+    protected String getBeginEventType() {
+        return UserProfileCreated.BeginJobDomainEvent.TYPE;
+    }
 
-        String firstAction = actionNames.getFirst();
-        List<String> nextActions = actionNames.subList(1, actionNames.size());
+    @Override
+    protected String getProcessedEventType() {
+        return UserProfileCreated.ProcessedJobDomainEvent.TYPE;
+    }
 
-        this.domainEventPublisher.publish(
-                entity,
-                Collections.singletonList(
-                        new BeginCreateUserProfile(
-                                data.getJobId(),
-                                nextActions,
-                                firstAction,
-                                data.getStartedAt()
-                        )
-                ),
-                BeginCreateUserProfile.TYPE);
+    @Override
+    protected String getFailedEventType() {
+        return UserProfileCreated.FailedJobDomainEvent.TYPE;
+    }
+
+    @Override
+    protected String getSuccessfullyEventType() {
+        return UserProfileCreated.SuccessJobDomainEvent.TYPE;
+    }
+
+    private void handleCreateUserProfileReply(
+            CreateUserProfileSagaState state, CreateUserProfileReply.Success reply) {
+        CreateUserProfileReply.Success.Data data = reply.getData();
+        state.setUserProfileDto(data.getUserProfile());
+        this.processedEventPublish(state, reply);
+    }
+
+    private void handleCreateUserPreferenceReply(
+            CreateUserProfileSagaState state, CreateUserPreferenceReply.Success reply) {
+        CreateUserPreferenceReply.Success.Data data = reply.getData();
+        state.setUserPreferenceDto(data.getUserPreference());
+        this.processedEventPublish(state, reply);
     }
 
     @Override
     public void onSagaCompletedSuccessfully(String sagaId, CreateUserProfileSagaState data) {
-        UserProfileEntity entity = new UserProfileEntity();
-        entity.setUserProfileId(data.getUserProfileId() == null ? EventDummyId.NOT_INITIALIZED : data.getUserProfileId());
-        CreateUserProfileData d = new CreateUserProfileData(
-                data.getUserProfileId()
+        CreateUserProfileResultData resultData = new CreateUserProfileResultData(
+                data.getUserProfileDto(),
+                data.getUserPreferenceDto()
         );
-        this.domainEventPublisher.publish(
-                entity,
-                Collections.singletonList(
-                        new SuccessfullyCreateUserProfile(
-                                data.getJobId(),
-                                d
-                        )
-                ),
-                SuccessfullyCreateUserProfile.TYPE);
+        successfullyEventPublish(data, resultData);
     }
 
-    @Override
-    public void onSagaRolledBack(String sagaId, CreateUserProfileSagaState data) {
-    }
-
-    @Override
-    public void onSagaFailed(String sagaId, CreateUserProfileSagaState data) {
+    public enum Action {
+        CREATE_USER_PROFILE,
+        CREATE_USER_PREFERENCE
     }
 
     @Override
@@ -184,7 +140,7 @@ public class CreateUserProfileSaga implements SimpleSaga<CreateUserProfileSagaSt
 
     @Override
     public String getSagaType() {
-        return CreateUserProfileSaga.TYPE;
+        return UserProfileSagaType.CREATE_USER_PROFILE;
     }
 
     @Override
