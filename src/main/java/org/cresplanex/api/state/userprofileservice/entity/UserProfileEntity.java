@@ -9,7 +9,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +23,7 @@ import org.cresplanex.api.state.common.utils.OriginalAutoGenerate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "user_profiles")
-public class UserProfileEntity extends BaseEntity {
+public class UserProfileEntity extends BaseEntity<UserProfileEntity> {
 
     @Override
     public String getId() {
@@ -43,10 +42,6 @@ public class UserProfileEntity extends BaseEntity {
 
     @Column(name = "user_id", length = 100, nullable = false, unique = true)
     private String userId;
-
-    @Version
-    @Column(name = "version", nullable = false)
-    private Integer version;
 
     @Column(name = "name", length = 200, nullable = false)
     private String name;
