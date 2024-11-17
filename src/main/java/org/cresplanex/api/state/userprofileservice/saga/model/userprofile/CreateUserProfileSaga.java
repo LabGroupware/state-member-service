@@ -29,7 +29,7 @@ public class CreateUserProfileSaga extends SagaModel<
 
     public CreateUserProfileSaga(
             UserProfileServiceProxy userProfileService,
-            UserPreferenceServiceProxy userPreferenceServiceProxy,
+            UserPreferenceServiceProxy userPreferenceService,
             UserProfileDomainEventPublisher domainEventPublisher
     ) {
         this.sagaDefinition = step()
@@ -53,7 +53,7 @@ public class CreateUserProfileSaga extends SagaModel<
                 )
                 .step()
                 .invokeParticipant(
-                        userPreferenceServiceProxy.createUserPreference,
+                        userPreferenceService.createUserPreference,
                         CreateUserProfileSagaState::makeCreateUserPreferenceCommand
                 )
                 .onReply(
@@ -67,7 +67,7 @@ public class CreateUserProfileSaga extends SagaModel<
                         this::handleFailureReply
                 )
                 .withCompensation(
-                        userPreferenceServiceProxy.undoCreateUserPreference,
+                        userPreferenceService.undoCreateUserPreference,
                         CreateUserProfileSagaState::makeUndoCreateUserPreferenceCommand
                 )
                 .build();
