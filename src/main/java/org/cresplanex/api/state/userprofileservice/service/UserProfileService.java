@@ -25,33 +25,35 @@ public class UserProfileService extends BaseService {
 
     private final CreateUserProfileSaga createUserProfileSaga;
 
+    @Transactional(readOnly = true)
     public UserProfileEntity findById(String userProfileId) {
-        return userProfileRepository.findById(userProfileId).orElseThrow(() -> {
-            return new UserProfileNotFoundException(
-                    UserProfileNotFoundException.FindType.BY_ID,
-                    userProfileId
-            );
-        });
+        return internalFindById(userProfileId);
     }
 
+    private UserProfileEntity internalFindById(String userProfileId) {
+        return userProfileRepository.findById(userProfileId).orElseThrow(() -> new UserProfileNotFoundException(
+                UserProfileNotFoundException.FindType.BY_ID,
+                userProfileId
+        ));
+    }
+
+    @Transactional(readOnly = true)
     public UserProfileEntity findByUserId(String userId) {
-        return userProfileRepository.findByUserId(userId).orElseThrow(() -> {
-            return new UserProfileNotFoundException(
-                    UserProfileNotFoundException.FindType.BY_USER_ID,
-                    userId
-            );
-        });
+        return userProfileRepository.findByUserId(userId).orElseThrow(() -> new UserProfileNotFoundException(
+                UserProfileNotFoundException.FindType.BY_USER_ID,
+                userId
+        ));
     }
 
+    @Transactional(readOnly = true)
     public UserProfileEntity findByEmail(String email) {
-        return userProfileRepository.findByEmail(email).orElseThrow(() -> {
-            return new UserProfileNotFoundException(
-                    UserProfileNotFoundException.FindType.BY_EMAIL,
-                    email
-            );
-        });
+        return userProfileRepository.findByEmail(email).orElseThrow(() -> new UserProfileNotFoundException(
+                UserProfileNotFoundException.FindType.BY_EMAIL,
+                email
+        ));
     }
 
+    @Transactional(readOnly = true)
     public List<UserProfileEntity> get() {
         return userProfileRepository.findAll();
     }
@@ -78,7 +80,7 @@ public class UserProfileService extends BaseService {
     }
 
     public void undoCreate(String userProfileId) {
-        UserProfileEntity profile = findById(userProfileId);
+        UserProfileEntity profile = internalFindById(userProfileId);
         if (profile == null) {
             throw new UserProfileNotFoundException(
                     UserProfileNotFoundException.FindType.BY_ID,
