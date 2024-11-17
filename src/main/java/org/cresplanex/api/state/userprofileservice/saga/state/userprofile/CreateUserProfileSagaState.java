@@ -15,8 +15,8 @@ import org.cresplanex.api.state.userprofileservice.saga.model.userprofile.Create
 public class CreateUserProfileSagaState
         extends SagaState<CreateUserProfileSaga.Action, UserProfileEntity> {
     private InitialData initialData;
-    private UserProfileDto userProfileDto = new UserProfileDto();
-    private UserPreferenceDto userPreferenceDto = new UserPreferenceDto();
+    private UserProfileDto userProfileDto = UserProfileDto.empty();
+    private UserPreferenceDto userPreferenceDto = UserPreferenceDto.empty();
 
     @Override
     public String getId() {

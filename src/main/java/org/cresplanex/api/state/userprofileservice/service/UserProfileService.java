@@ -18,7 +18,6 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-@Transactional
 public class UserProfileService extends BaseService {
 
     private final UserProfileRepository userProfileRepository;
@@ -57,6 +56,7 @@ public class UserProfileService extends BaseService {
         return userProfileRepository.findAll();
     }
 
+    @Transactional
     public void beginCreate(UserProfileEntity profile) {
         CreateUserProfileSagaState.InitialData initialData = CreateUserProfileSagaState.InitialData.builder()
                 .userId(profile.getUserId())
