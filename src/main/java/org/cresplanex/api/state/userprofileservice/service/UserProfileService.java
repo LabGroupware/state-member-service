@@ -3,6 +3,7 @@ package org.cresplanex.api.state.userprofileservice.service;
 import lombok.extern.slf4j.Slf4j;
 import org.cresplanex.api.state.common.service.BaseService;
 import org.cresplanex.api.state.userprofileservice.entity.UserProfileEntity;
+import org.cresplanex.api.state.userprofileservice.exception.NotFoundUserException;
 import org.cresplanex.api.state.userprofileservice.exception.UserProfileNotFoundException;
 import org.cresplanex.api.state.userprofileservice.repository.UserProfileRepository;
 import org.cresplanex.api.state.userprofileservice.saga.model.userprofile.CreateUserProfileSaga;
@@ -81,13 +82,19 @@ public class UserProfileService extends BaseService {
     }
 
     public void undoCreate(String userProfileId) {
-        UserProfileEntity profile = internalFindById(userProfileId);
-        if (profile == null) {
-            throw new UserProfileNotFoundException(
-                    UserProfileNotFoundException.FindType.BY_ID,
-                    userProfileId
-            );
+        userProfileRepository.deleteById(userProfileId);
+    }
+
+    public void validateUsers(List<String> userIds) {
+        List<String> existUserIds = userProfileRepository.findAllByUserIdIn(userIds)
+                .stream()
+                .map(UserProfileEntity::getUserId)
+                .toList();
+        if (existUserIds.size() != userIds.size()) {
+            List<String> notExistUserIds = userIds.stream()
+                    .filter(userId -> !existUserIds.contains(userId))
+                    .toList();
+            throw new NotFoundUserException(notExistUserIds);
         }
-        userProfileRepository.delete(profile);
     }
 }
