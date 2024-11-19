@@ -102,10 +102,29 @@ public class UserProfileServiceHandler extends UserProfileServiceGrpc.UserProfil
             default -> (request.getSort().getOrder() == SortOrder.SORT_ORDER_ASC) ?
                     UserProfileSortType.CREATED_AT_ASC : UserProfileSortType.CREATED_AT_DESC;
         };
-        List<UserProfile> userProfileProtos = this.userProfileService.getByUserIds(
+        List<UserProfile> userProfileProtos = this.userProfileService.getByUserProfileIds(
                 request.getUserProfileIdsList(), sortType).stream()
                 .map(ProtoMapper::convert).toList();
         GetPluralUserProfilesResponse response = GetPluralUserProfilesResponse.newBuilder()
+                .addAllUserProfiles(userProfileProtos)
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getPluralUserProfilesByUserId(GetPluralUserProfilesByUserIdRequest request, StreamObserver<GetPluralUserProfilesByUserIdResponse> responseObserver) {
+        UserProfileSortType sortType = switch (request.getSort().getOrderField()) {
+            case USER_PROFILE_ORDER_FIELD_NAME -> (request.getSort().getOrder() == SortOrder.SORT_ORDER_ASC) ?
+                    UserProfileSortType.NAME_ASC : UserProfileSortType.NAME_DESC;
+            default -> (request.getSort().getOrder() == SortOrder.SORT_ORDER_ASC) ?
+                    UserProfileSortType.CREATED_AT_ASC : UserProfileSortType.CREATED_AT_DESC;
+        };
+        List<UserProfile> userProfileProtos = this.userProfileService.getByUserIds(
+                        request.getUserIdsList(), sortType).stream()
+                .map(ProtoMapper::convert).toList();
+        GetPluralUserProfilesByUserIdResponse response = GetPluralUserProfilesByUserIdResponse.newBuilder()
                 .addAllUserProfiles(userProfileProtos)
                 .build();
 

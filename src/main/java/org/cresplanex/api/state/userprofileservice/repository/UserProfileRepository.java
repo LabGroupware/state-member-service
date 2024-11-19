@@ -31,6 +31,13 @@ public interface UserProfileRepository extends JpaRepository<UserProfileEntity, 
             "CASE WHEN :sortType = 'NAME_DESC' THEN u.name END DESC")
     List<UserProfileEntity> findListWithOffsetPagination(UserProfileSortType sortType, Pageable pageable);
 
+    @Query("SELECT u FROM UserProfileEntity u WHERE u.userProfileId IN :userProfileIds ORDER BY " +
+            "CASE WHEN :sortType = 'CREATED_AT_ASC' THEN u.createdAt END ASC, " +
+            "CASE WHEN :sortType = 'CREATED_AT_DESC' THEN u.createdAt END DESC, " +
+            "CASE WHEN :sortType = 'NAME_ASC' THEN u.name END ASC, " +
+            "CASE WHEN :sortType = 'NAME_DESC' THEN u.name END DESC")
+    List<UserProfileEntity> findListByUserProfileIds(List<String> userProfileIds, UserProfileSortType sortType);
+
     @Query("SELECT u FROM UserProfileEntity u WHERE u.userId IN :userIds ORDER BY " +
             "CASE WHEN :sortType = 'CREATED_AT_ASC' THEN u.createdAt END ASC, " +
             "CASE WHEN :sortType = 'CREATED_AT_DESC' THEN u.createdAt END DESC, " +
@@ -47,7 +54,4 @@ public interface UserProfileRepository extends JpaRepository<UserProfileEntity, 
 
     @Query("SELECT COUNT(u) FROM UserProfileEntity u")
     int countList();
-
-    @Query("SELECT COUNT(u) FROM UserProfileEntity u WHERE u.userId IN :userIds")
-    int countListByUserIds(List<String> userIds);
 }

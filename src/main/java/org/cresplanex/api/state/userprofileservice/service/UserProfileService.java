@@ -92,6 +92,14 @@ public class UserProfileService extends BaseService {
         return userProfileRepository.findListByUserIds(userIds, sortType);
     }
 
+    @Transactional(readOnly = true)
+    public List<UserProfileEntity> getByUserProfileIds(
+            List<String> userProfileIds,
+            UserProfileSortType sortType
+    ) {
+        return userProfileRepository.findListByUserProfileIds(userProfileIds, sortType);
+    }
+
     // Messaging Handler内で処理されるため, Transactionalは親のTransactionに参加する
 //    @Transactional
     public void beginCreate(UserProfileEntity profile) {
