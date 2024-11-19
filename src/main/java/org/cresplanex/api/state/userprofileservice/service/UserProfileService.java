@@ -1,14 +1,18 @@
 package org.cresplanex.api.state.userprofileservice.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.cresplanex.api.state.common.entity.ListEntityWithCount;
+import org.cresplanex.api.state.common.enums.PaginationType;
 import org.cresplanex.api.state.common.service.BaseService;
 import org.cresplanex.api.state.userprofileservice.entity.UserProfileEntity;
+import org.cresplanex.api.state.userprofileservice.enums.UserProfileSortType;
 import org.cresplanex.api.state.userprofileservice.exception.NotFoundUserException;
 import org.cresplanex.api.state.userprofileservice.exception.UserProfileNotFoundException;
 import org.cresplanex.api.state.userprofileservice.repository.UserProfileRepository;
 import org.cresplanex.api.state.userprofileservice.saga.model.userprofile.CreateUserProfileSaga;
 import org.cresplanex.api.state.userprofileservice.saga.state.userprofile.CreateUserProfileSagaState;
 import org.cresplanex.core.saga.orchestration.SagaInstanceFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -55,8 +59,37 @@ public class UserProfileService extends BaseService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserProfileEntity> get() {
-        return userProfileRepository.findAll();
+    public ListEntityWithCount<UserProfileEntity> get(
+            PaginationType paginationType,
+            int limit,
+            int offset,
+            String cursor,
+            UserProfileSortType sortType,
+            boolean withCount
+    ) {
+        List<UserProfileEntity> data = switch (paginationType) {
+            case OFFSET ->
+                    userProfileRepository.findListWithOffsetPagination(sortType, PageRequest.of(offset / limit, limit));
+            case CURSOR -> userProfileRepository.findList(sortType); // TODO: Implement cursor pagination
+            default -> userProfileRepository.findList(sortType);
+        };
+
+        int count = 0;
+        if (withCount){
+            count = userProfileRepository.countList();
+        }
+        return new ListEntityWithCount<>(
+                data,
+                count
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserProfileEntity> getByUserIds(
+            List<String> userIds,
+            UserProfileSortType sortType
+    ) {
+        return userProfileRepository.findListByUserIds(userIds, sortType);
     }
 
     // Messaging Handler内で処理されるため, Transactionalは親のTransactionに参加する

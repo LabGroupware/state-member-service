@@ -1,9 +1,14 @@
 package org.cresplanex.api.state.userprofileservice.handler;
 
+import build.buf.gen.cresplanex.nova.v1.Count;
+import build.buf.gen.cresplanex.nova.v1.SortOrder;
 import build.buf.gen.userprofile.v1.*;
+import org.cresplanex.api.state.common.entity.ListEntityWithCount;
 import org.cresplanex.api.state.userprofileservice.entity.UserProfileEntity;
+import org.cresplanex.api.state.userprofileservice.enums.UserProfileSortType;
 import org.cresplanex.api.state.userprofileservice.mapper.proto.ProtoMapper;
 import org.cresplanex.api.state.userprofileservice.service.UserProfileService;
+import org.cresplanex.api.state.common.enums.PaginationType;
 
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
@@ -56,14 +61,51 @@ public class UserProfileServiceHandler extends UserProfileServiceGrpc.UserProfil
         responseObserver.onCompleted();
     }
 
-    // TODO: pagination + with count
     @Override
     public void getUserProfiles(GetUserProfilesRequest request, StreamObserver<GetUserProfilesResponse> responseObserver) {
-        List<UserProfileEntity> userProfiles = userProfileService.get();
+        UserProfileSortType sortType = switch (request.getSort().getOrderField()) {
+            case USER_PROFILE_ORDER_FIELD_NAME -> (request.getSort().getOrder() == SortOrder.SORT_ORDER_ASC) ?
+                    UserProfileSortType.NAME_ASC : UserProfileSortType.NAME_DESC;
+            default -> (request.getSort().getOrder() == SortOrder.SORT_ORDER_ASC) ?
+                    UserProfileSortType.CREATED_AT_ASC : UserProfileSortType.CREATED_AT_DESC;
+        };
+        PaginationType paginationType;
+        switch (request.getPagination().getType()) {
+            case PAGINATION_TYPE_CURSOR -> paginationType = PaginationType.CURSOR;
+            case PAGINATION_TYPE_OFFSET -> paginationType = PaginationType.OFFSET;
+            default -> paginationType = PaginationType.NONE;
+        }
 
-        List<UserProfile> userProfileProtos = userProfiles.stream()
+        ListEntityWithCount<UserProfileEntity> userProfiles = userProfileService.get(
+                paginationType, request.getPagination().getLimit(), request.getPagination().getOffset(),
+                request.getPagination().getCursor(), sortType, request.getWithCount());
+
+        List<UserProfile> userProfileProtos = userProfiles.getData().stream()
                 .map(ProtoMapper::convert).toList();
         GetUserProfilesResponse response = GetUserProfilesResponse.newBuilder()
+                .addAllUserProfiles(userProfileProtos)
+                .setCount(
+                        Count.newBuilder().setIsValid(request.getWithCount())
+                                .setCount(userProfiles.getCount()).build()
+                )
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getPluralUserProfiles(GetPluralUserProfilesRequest request, StreamObserver<GetPluralUserProfilesResponse> responseObserver) {
+        UserProfileSortType sortType = switch (request.getSort().getOrderField()) {
+            case USER_PROFILE_ORDER_FIELD_NAME -> (request.getSort().getOrder() == SortOrder.SORT_ORDER_ASC) ?
+                    UserProfileSortType.NAME_ASC : UserProfileSortType.NAME_DESC;
+            default -> (request.getSort().getOrder() == SortOrder.SORT_ORDER_ASC) ?
+                    UserProfileSortType.CREATED_AT_ASC : UserProfileSortType.CREATED_AT_DESC;
+        };
+        List<UserProfile> userProfileProtos = this.userProfileService.getByUserIds(
+                request.getUserProfileIdsList(), sortType).stream()
+                .map(ProtoMapper::convert).toList();
+        GetPluralUserProfilesResponse response = GetPluralUserProfilesResponse.newBuilder()
                 .addAllUserProfiles(userProfileProtos)
                 .build();
 

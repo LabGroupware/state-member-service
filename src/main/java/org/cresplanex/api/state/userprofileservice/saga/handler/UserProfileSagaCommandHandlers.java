@@ -104,7 +104,14 @@ public class UserProfileSagaCommandHandlers {
         try {
             UserExistValidateCommand command = cmd.getCommand();
             userProfileService.validateUsers(command.getUserIds());
-            return withSuccess();
+            return withSuccess(
+                    new UserExistValidateReply.Success(
+                            null,
+                            UserProfileServiceApplicationCode.SUCCESS,
+                            "User exist validate successfully",
+                            LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                    ), UserExistValidateReply.Success.TYPE
+            );
         } catch (NotFoundUserException e) {
             UserExistValidateReply.Failure reply = new UserExistValidateReply.Failure(
                     new UserExistValidateReply.Failure.UserNotFound(e.getUserIds()),
