@@ -13,6 +13,7 @@ import org.cresplanex.api.state.userprofileservice.saga.model.userprofile.Create
 import org.cresplanex.api.state.userprofileservice.saga.state.userprofile.CreateUserProfileSagaState;
 import org.cresplanex.core.saga.orchestration.SagaInstanceFactory;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -67,16 +68,18 @@ public class UserProfileService extends BaseService {
             UserProfileSortType sortType,
             boolean withCount
     ) {
+        Specification<UserProfileEntity> spec = Specification.where(null);
+
         List<UserProfileEntity> data = switch (paginationType) {
             case OFFSET ->
-                    userProfileRepository.findListWithOffsetPagination(sortType, PageRequest.of(offset / limit, limit));
-            case CURSOR -> userProfileRepository.findList(sortType); // TODO: Implement cursor pagination
-            default -> userProfileRepository.findList(sortType);
+                    userProfileRepository.findListWithOffsetPagination(spec, sortType, PageRequest.of(offset / limit, limit));
+            case CURSOR -> userProfileRepository.findList(spec, sortType); // TODO: Implement cursor pagination
+            default -> userProfileRepository.findList(spec, sortType);
         };
 
         int count = 0;
         if (withCount){
-            count = userProfileRepository.countList();
+            count = userProfileRepository.countList(spec);
         }
         return new ListEntityWithCount<>(
                 data,
