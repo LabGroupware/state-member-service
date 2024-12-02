@@ -151,7 +151,7 @@ public class UserProfileService extends BaseService {
         }
     }
 
-    public Sort createSort(UserProfileSortType sortType) {
+    private Sort createSort(UserProfileSortType sortType) {
         return switch (sortType) {
             case CREATED_AT_ASC -> Sort.by(Sort.Order.asc("createdAt"));
             case CREATED_AT_DESC -> Sort.by(Sort.Order.desc("createdAt"));
