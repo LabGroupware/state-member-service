@@ -26,33 +26,8 @@ public interface UserProfileRepository extends JpaRepository<UserProfileEntity, 
      */
     List<UserProfileEntity> findAllByUserIdIn(List<String> userIds);
 
-    @Query("SELECT u FROM UserProfileEntity u ORDER BY " +
-            "CASE WHEN :sortType = 'CREATED_AT_ASC' THEN u.createdAt END ASC, " +
-            "CASE WHEN :sortType = 'CREATED_AT_DESC' THEN u.createdAt END DESC, " +
-            "CASE WHEN :sortType = 'NAME_ASC' THEN u.name END ASC, " +
-            "CASE WHEN :sortType = 'NAME_DESC' THEN u.name END DESC")
-    List<UserProfileEntity> findListWithOffsetPagination(Specification<UserProfileEntity> specification, UserProfileSortType sortType, Pageable pageable);
-
-    @Query("SELECT u FROM UserProfileEntity u WHERE u.userProfileId IN :userProfileIds ORDER BY " +
-            "CASE WHEN :sortType = 'CREATED_AT_ASC' THEN u.createdAt END ASC, " +
-            "CASE WHEN :sortType = 'CREATED_AT_DESC' THEN u.createdAt END DESC, " +
-            "CASE WHEN :sortType = 'NAME_ASC' THEN u.name END ASC, " +
-            "CASE WHEN :sortType = 'NAME_DESC' THEN u.name END DESC")
-    List<UserProfileEntity> findListByUserProfileIds(List<String> userProfileIds, UserProfileSortType sortType);
-
-    @Query("SELECT u FROM UserProfileEntity u WHERE u.userId IN :userIds ORDER BY " +
-            "CASE WHEN :sortType = 'CREATED_AT_ASC' THEN u.createdAt END ASC, " +
-            "CASE WHEN :sortType = 'CREATED_AT_DESC' THEN u.createdAt END DESC, " +
-            "CASE WHEN :sortType = 'NAME_ASC' THEN u.name END ASC, " +
-            "CASE WHEN :sortType = 'NAME_DESC' THEN u.name END DESC")
-    List<UserProfileEntity> findListByUserIds(List<String> userIds, UserProfileSortType sortType);
-
-    @Query("SELECT u FROM UserProfileEntity u ORDER BY " +
-            "CASE WHEN :sortType = 'CREATED_AT_ASC' THEN u.createdAt END ASC, " +
-            "CASE WHEN :sortType = 'CREATED_AT_DESC' THEN u.createdAt END DESC, " +
-            "CASE WHEN :sortType = 'NAME_ASC' THEN u.name END ASC, " +
-            "CASE WHEN :sortType = 'NAME_DESC' THEN u.name END DESC")
-    List<UserProfileEntity> findList(Specification<UserProfileEntity> specification, UserProfileSortType sortType);
+    @Query("SELECT u FROM UserProfileEntity u")
+    List<UserProfileEntity> findList(Specification<UserProfileEntity> specification, Pageable pageable);
 
     @Query("SELECT COUNT(u) FROM UserProfileEntity u")
     int countList(Specification<UserProfileEntity> specification);
