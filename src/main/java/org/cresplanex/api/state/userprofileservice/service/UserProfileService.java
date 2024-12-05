@@ -114,7 +114,7 @@ public class UserProfileService extends BaseService {
 
     // Messaging Handler内で処理されるため, Transactionalは親のTransactionに参加する
 //    @Transactional
-    public void beginCreate(UserProfileEntity profile) {
+    public String beginCreate(UserProfileEntity profile) {
         CreateUserProfileSagaState.InitialData initialData = CreateUserProfileSagaState.InitialData.builder()
                 .userId(profile.getUserId())
                 .name(profile.getName())
@@ -128,6 +128,8 @@ public class UserProfileService extends BaseService {
         state.setJobId(jobId);
 
         sagaInstanceFactory.create(createUserProfileSaga, state);
+
+        return jobId;
     }
 
     public UserProfileEntity create(UserProfileEntity profile) {

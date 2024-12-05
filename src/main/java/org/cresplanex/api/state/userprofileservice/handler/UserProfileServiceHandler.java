@@ -2,6 +2,7 @@ package org.cresplanex.api.state.userprofileservice.handler;
 
 import build.buf.gen.cresplanex.nova.v1.Count;
 import build.buf.gen.cresplanex.nova.v1.SortOrder;
+import build.buf.gen.team.v1.CreateTeamResponse;
 import build.buf.gen.userprofile.v1.*;
 import org.cresplanex.api.state.common.entity.ListEntityWithCount;
 import org.cresplanex.api.state.userprofileservice.entity.UserProfileEntity;
@@ -126,6 +127,24 @@ public class UserProfileServiceHandler extends UserProfileServiceGrpc.UserProfil
                 .map(ProtoMapper::convert).toList();
         GetPluralUserProfilesByUserIdResponse response = GetPluralUserProfilesByUserIdResponse.newBuilder()
                 .addAllUserProfiles(userProfileProtos)
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void createUserProfile(CreateUserProfileRequest request, StreamObserver<CreateUserProfileResponse> responseObserver) {
+        String operatorId = request.getOperatorId();
+        UserProfileEntity userProfile = new UserProfileEntity();
+        userProfile.setUserId(request.getUserId());
+        userProfile.setEmail(request.getEmail());
+        userProfile.setName(request.getName());
+        userProfile.setNickname(request.getName());
+
+        String jobId = userProfileService.beginCreate(userProfile);
+        CreateUserProfileResponse response = CreateUserProfileResponse.newBuilder()
+                .setJobId(jobId)
                 .build();
 
         responseObserver.onNext(response);
