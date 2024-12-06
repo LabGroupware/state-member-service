@@ -61,15 +61,12 @@ public class UserProfileEntity extends BaseEntity<UserProfileEntity> {
     @Column(name = "nickname", length = 100)
     private String nickname;
 
-    @Lob
     @Column(name = "profile")
     private String profile;
 
-    @Lob
     @Column(name = "picture")
     private String picture;
 
-    @Lob
     @Column(name = "website")
     private String website;
 

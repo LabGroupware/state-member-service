@@ -10,6 +10,7 @@ import org.cresplanex.api.state.common.saga.reply.userprofile.CreateUserProfileR
 import org.cresplanex.api.state.common.saga.reply.userprofile.UserExistValidateReply;
 import org.cresplanex.api.state.common.saga.validate.userprofile.UserExistValidateCommand;
 import org.cresplanex.api.state.userprofileservice.entity.UserProfileEntity;
+import org.cresplanex.api.state.userprofileservice.exception.DuplicatedUserException;
 import org.cresplanex.api.state.userprofileservice.exception.NotFoundUserException;
 import org.cresplanex.api.state.userprofileservice.mapper.dto.DtoMapper;
 import org.cresplanex.api.state.userprofileservice.service.UserProfileService;
@@ -19,6 +20,7 @@ import org.cresplanex.core.commands.consumer.PathVariables;
 import org.cresplanex.core.messaging.common.Message;
 import org.cresplanex.core.saga.lock.LockTarget;
 import org.cresplanex.core.saga.participant.SagaCommandHandlersBuilder;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -76,7 +78,16 @@ public class UserProfileSagaCommandHandlers {
             );
             return withLock(LockTargetType.USER_PROFILE, userProfile.getUserProfileId())
                     .withSuccess(reply, CreateUserProfileReply.Success.TYPE);
-        } catch (Exception e) {
+        } catch (DuplicatedUserException e) {
+            log.info("User duplicated: {}", e.getUserIds());
+            CreateUserProfileReply.Failure reply = new CreateUserProfileReply.Failure(
+                    new CreateUserProfileReply.Failure.UserDuplicated(e.getUserIds()),
+                    UserProfileServiceApplicationCode.DUPLICATE_USER,
+                    "User duplicated",
+                    LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+            );
+            return withException(reply, CreateUserProfileReply.Failure.TYPE);
+        }  catch (Exception e) {
             CreateUserProfileReply.Failure reply = new CreateUserProfileReply.Failure(
                     null,
                     UserProfileServiceApplicationCode.INTERNAL_SERVER_ERROR,

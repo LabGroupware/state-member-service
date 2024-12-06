@@ -6,6 +6,7 @@ import org.cresplanex.api.state.common.enums.PaginationType;
 import org.cresplanex.api.state.common.service.BaseService;
 import org.cresplanex.api.state.userprofileservice.entity.UserProfileEntity;
 import org.cresplanex.api.state.userprofileservice.enums.UserProfileSortType;
+import org.cresplanex.api.state.userprofileservice.exception.DuplicatedUserException;
 import org.cresplanex.api.state.userprofileservice.exception.NotFoundUserException;
 import org.cresplanex.api.state.userprofileservice.exception.UserProfileNotFoundException;
 import org.cresplanex.api.state.userprofileservice.repository.UserProfileRepository;
@@ -19,6 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -133,6 +135,10 @@ public class UserProfileService extends BaseService {
     }
 
     public UserProfileEntity create(UserProfileEntity profile) {
+        userProfileRepository.findByUserId(profile.getUserId()).ifPresent(userProfile -> {
+            throw new DuplicatedUserException(List.of(profile.getUserId()));
+        });
+
         return userProfileRepository.save(profile);
     }
 
