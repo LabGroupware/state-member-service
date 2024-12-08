@@ -12,7 +12,10 @@ import org.cresplanex.api.state.userprofileservice.exception.UserProfileNotFound
 import org.cresplanex.api.state.userprofileservice.repository.UserProfileRepository;
 import org.cresplanex.api.state.userprofileservice.saga.model.userprofile.CreateUserProfileSaga;
 import org.cresplanex.api.state.userprofileservice.saga.state.userprofile.CreateUserProfileSagaState;
+import org.cresplanex.api.state.userprofileservice.specification.UserProfileSpecifications;
 import org.cresplanex.core.saga.orchestration.SagaInstanceFactory;
+import org.hibernate.type.descriptor.java.StringJavaType;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -82,14 +86,14 @@ public class UserProfileService extends BaseService {
             default -> Pageable.unpaged(sort);
         };
 
-        List<UserProfileEntity> data = userProfileRepository.findList(spec, pageable);
+        Page<UserProfileEntity> data = userProfileRepository.findAll(spec, pageable);
 
         int count = 0;
         if (withCount){
-            count = userProfileRepository.countList(spec);
+            count = (int) data.getTotalElements();
         }
         return new ListEntityWithCount<>(
-                data,
+                data.getContent(),
                 count
         );
     }
@@ -99,9 +103,10 @@ public class UserProfileService extends BaseService {
             List<String> userIds,
             UserProfileSortType sortType
     ) {
-        Specification<UserProfileEntity> spec = (root, query, cb) ->
-                root.get("userId").in(userIds);
-        return userProfileRepository.findList(spec, Pageable.unpaged(createSort(sortType)));
+        Specification<UserProfileEntity> spec = Specification.
+                where(UserProfileSpecifications.whereUserIds(userIds));
+
+        return userProfileRepository.findAll(spec, createSort(sortType));
     }
 
     @Transactional(readOnly = true)
@@ -109,9 +114,10 @@ public class UserProfileService extends BaseService {
             List<String> userProfileIds,
             UserProfileSortType sortType
     ) {
-        Specification<UserProfileEntity> spec = (root, query, cb) ->
-                root.get("userProfileId").in(userProfileIds);
-        return userProfileRepository.findList(spec, Pageable.unpaged(createSort(sortType)));
+        Specification<UserProfileEntity> spec = Specification.
+                where(UserProfileSpecifications.whereUserProfileIds(userProfileIds));
+
+        return userProfileRepository.findAll(spec, createSort(sortType));
     }
 
     // Messaging Handler内で処理されるため, Transactionalは親のTransactionに参加する

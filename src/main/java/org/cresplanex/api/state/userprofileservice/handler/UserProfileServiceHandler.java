@@ -4,6 +4,7 @@ import build.buf.gen.cresplanex.nova.v1.Count;
 import build.buf.gen.cresplanex.nova.v1.SortOrder;
 import build.buf.gen.team.v1.CreateTeamResponse;
 import build.buf.gen.userprofile.v1.*;
+import lombok.extern.slf4j.Slf4j;
 import org.cresplanex.api.state.common.entity.ListEntityWithCount;
 import org.cresplanex.api.state.userprofileservice.entity.UserProfileEntity;
 import org.cresplanex.api.state.userprofileservice.enums.UserProfileSortType;
@@ -17,6 +18,7 @@ import net.devh.boot.grpc.server.service.GrpcService;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @GrpcService
 public class UserProfileServiceHandler extends UserProfileServiceGrpc.UserProfileServiceImplBase {
@@ -116,6 +118,7 @@ public class UserProfileServiceHandler extends UserProfileServiceGrpc.UserProfil
 
     @Override
     public void getPluralUserProfilesByUserId(GetPluralUserProfilesByUserIdRequest request, StreamObserver<GetPluralUserProfilesByUserIdResponse> responseObserver) {
+
         UserProfileSortType sortType = switch (request.getSort().getOrderField()) {
             case USER_PROFILE_ORDER_FIELD_NAME -> (request.getSort().getOrder() == SortOrder.SORT_ORDER_ASC) ?
                     UserProfileSortType.NAME_ASC : UserProfileSortType.NAME_DESC;

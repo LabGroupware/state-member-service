@@ -25,10 +25,4 @@ public interface UserProfileRepository extends JpaRepository<UserProfileEntity, 
      * @return UserProfileEntityのリスト
      */
     List<UserProfileEntity> findAllByUserIdIn(List<String> userIds);
-
-    @Query("SELECT u FROM UserProfileEntity u")
-    List<UserProfileEntity> findList(Specification<UserProfileEntity> specification, Pageable pageable);
-
-    @Query("SELECT COUNT(u) FROM UserProfileEntity u")
-    int countList(Specification<UserProfileEntity> specification);
 }
