@@ -120,6 +120,25 @@ public class UserProfileService extends BaseService {
         return userProfileRepository.findAll(spec, createSort(sortType));
     }
 
+    @Transactional
+    public String beginCreateWithTransaction(UserProfileEntity profile) {
+        CreateUserProfileSagaState.InitialData initialData = CreateUserProfileSagaState.InitialData.builder()
+                .userId(profile.getUserId())
+                .name(profile.getName())
+                .email(profile.getEmail())
+                .nickname(profile.getNickname())
+                .build();
+        CreateUserProfileSagaState state = new CreateUserProfileSagaState();
+        state.setInitialData(initialData);
+
+        String jobId = getJobId();
+        state.setJobId(jobId);
+
+        sagaInstanceFactory.create(createUserProfileSaga, state);
+
+        return jobId;
+    }
+
     // Messaging Handler内で処理されるため, Transactionalは親のTransactionに参加する
 //    @Transactional
     public String beginCreate(UserProfileEntity profile) {

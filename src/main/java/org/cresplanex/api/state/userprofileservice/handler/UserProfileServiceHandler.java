@@ -145,7 +145,7 @@ public class UserProfileServiceHandler extends UserProfileServiceGrpc.UserProfil
         userProfile.setName(request.getName());
         userProfile.setNickname(request.getName());
 
-        String jobId = userProfileService.beginCreate(userProfile);
+        String jobId = userProfileService.beginCreateWithTransaction(userProfile);
         CreateUserProfileResponse response = CreateUserProfileResponse.newBuilder()
                 .setJobId(jobId)
                 .build();

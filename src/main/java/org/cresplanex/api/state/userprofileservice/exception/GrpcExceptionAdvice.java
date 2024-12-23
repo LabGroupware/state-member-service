@@ -50,11 +50,13 @@ public class GrpcExceptionAdvice {
     public Status handleInternal(Throwable e) {
          log.error("Internal error", e);
 
+        String message = e.getMessage() != null ? e.getMessage() : "Unknown error occurred";
+
          UserProfileServiceInternalError.Builder descriptionBuilder =
                  UserProfileServiceInternalError.newBuilder()
                          .setMeta(UserProfileServiceErrorMeta.newBuilder()
                                  .setCode(UserProfileServiceErrorCode.USER_PROFILE_SERVICE_ERROR_CODE_INTERNAL)
-                                 .setMessage(e.getMessage())
+                                 .setMessage(message)
                                  .build());
 
          return Status.INTERNAL
