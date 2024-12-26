@@ -1,6 +1,8 @@
 # 手動Build手順
 
 ``` sh
-./gradlew bootBuildImage --imageName=ablankz/nova-user-profile-service:1.0.5
-docker push ablankz/nova-user-profile-service:1.0.5
+BUILD_VERSION=1.0.5
+./gradlew jibMultiBuild -PimageVersion=$BUILD_VERSION
+docker push ablankz/nova-user-profile-service:$BUILD_VERSION-amd64
+docker push ablankz/nova-user-profile-service:$BUILD_VERSION-arm64
 ```
