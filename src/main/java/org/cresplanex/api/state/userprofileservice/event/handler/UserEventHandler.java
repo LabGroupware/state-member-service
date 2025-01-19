@@ -28,14 +28,13 @@ public class UserEventHandler {
     }
 
     private void handleUserCreated(DomainEventEnvelope<UserCreated> dee) {
-        // Test code
-//        UserProfileEntity userProfile = new UserProfileEntity();
-//        userProfile.setUserId(dee.getEvent().getUserId());
-//        userProfile.setName(dee.getEvent().getName());
-//        userProfile.setEmail(dee.getEvent().getEmail());
-//        userProfile.setNickname(dee.getEvent().getNickname());
-//        this.userProfileService.beginCreate(
-//                userProfile
-//        );
+        UserProfileEntity userProfile = new UserProfileEntity();
+        userProfile.setUserId(dee.getEvent().getUserId());
+        userProfile.setName(dee.getEvent().getName());
+        userProfile.setEmail(dee.getEvent().getEmail());
+        userProfile.setNickname(dee.getEvent().getNickname());
+        this.userProfileService.beginCreate(
+                userProfile
+        );
     }
 }
